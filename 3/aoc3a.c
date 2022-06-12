@@ -1,19 +1,19 @@
 #include <stdio.h>
 
+#define LINES 1000
+
+
 int power(int num, int pow);
 int bin2dec(long long bin);
 long long dec2bin(int nr);
+void read_input_arr(long long arr[]);
+void print_arr(long long arr[], int len);
 
 int main(void)
 {
-    long long binary = 0; // Binary number, type is long long as binary numbers are generally large.
-
-    int base = 5;
-    int exp = 3;
-    printf("%d to the power %d equals %d \n", base, exp, power(base, exp));
-
-    printf("1101 in binary is %d in decimal \n", bin2dec(1101));
-    printf("13 in decimal is %d in binary \n", dec2bin(13));
+    long long bins[LINES];
+    read_input_arr(bins);
+    print_arr(bins, LINES);
     return 0;
 }
 
@@ -60,4 +60,28 @@ int power(int num, int pow) // Raises numbers to power. Only nonnegative exponen
         return num;
     }
     return num * power(num, pow - 1);
+}
+
+void read_input_arr(long long arr[])
+{
+    FILE* fptr; // File pointer
+    fptr = fopen("input.txt", "r"); // Open file read only
+    int i = 0; // Line counter
+
+    if (fptr)
+    {
+        while (fscanf(fptr, "%lld", &arr[i]) != EOF) // Read line to array as int 
+        {
+            i++; // Increment i
+        }
+        fclose(fptr);
+    }
+}
+
+void print_arr(long long arr[], int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        printf("%lld\n", arr[i]);
+    }
 }
