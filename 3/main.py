@@ -34,4 +34,6 @@ for col in range(line_length):
         epsilon += "0"
         
 
+print(gamma)
+print(epsilon)
 print(bin2dec(gamma) * bin2dec(epsilon))

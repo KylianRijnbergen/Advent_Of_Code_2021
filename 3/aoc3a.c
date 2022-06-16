@@ -1,20 +1,117 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define LINES 1000
+#define ROWS 1000
+#define COLS 13
 
-
-int power(int num, int pow);
+void read_arr(char array[ROWS][COLS]);
+void print_array(char array[ROWS][COLS]);
+void count_occs(int *zeroes, int *ones, char array[ROWS][COLS], int row);
+void comp_g_e(char g[COLS], char e[COLS], char array[ROWS][COLS]);
 int bin2dec(long long bin);
 long long dec2bin(int nr);
-void read_input_arr(long long arr[]);
-void print_arr(long long arr[], int len);
+int power(int num, int pow);
 
 int main(void)
 {
-    long long bins[LINES];
-    read_input_arr(bins);
-    print_arr(bins, LINES);
+    char A[ROWS][COLS]; // Create array
+    read_arr(A); // Fill array
+    print_array(A); // Print array
+
+    // We now need to write some code that checks the most common bits.
+
+    // We do this to construct GAMMA and EPSILON
+    
+    //First, allocate some memory to GAMMA and EPSILON
+    char GAMMA[COLS]; // Set GAMMA
+    char EPSILON[COLS]; // Set EPSILON 
+    memset(&GAMMA, 0, sizeof(char) * COLS); // Clear GAMMA
+    memset(&EPSILON, 0, sizeof(char) * COLS); // Clear EPSILON
+
+    // We now need to write a function that can compute the entire GAMMA and EPSILONS
+    comp_g_e(GAMMA, EPSILON, A);
+    printf("Gamma is %s, Epsilon is %s\n", GAMMA, EPSILON);
+    
+    long long gbin = 0;
+    long long ebin = 0;
+    gbin = atoll(GAMMA);
+    ebin = atoll(EPSILON);
+    
+    int gdec = 0; 
+    int edec = 0;
+    gdec = bin2dec(gbin);
+    edec = bin2dec(ebin);
+    
+    printf("In decimal, Gamma is %d, Epsilon is %d. The product of these 2 numbers is %lld.\n", gdec, edec, gdec*edec);
+    
     return 0;
+}
+
+void read_arr(char array[ROWS][COLS])
+{
+    FILE* fptr; // File pointer
+    fptr = fopen("input.txt", "r");
+    int i = 0; // Line counter
+    int j = 0; // Column counter
+
+    for ( int i = 0; i < ROWS; i++)
+    {
+        for (int j = 0; j < COLS; j++)
+        {
+            fscanf(fptr, "%c", &array[i][j]);
+        }
+        array[i][COLS-1] = '\0';
+    }
+}
+
+void print_array(char array[ROWS][COLS])
+{
+    for (int i = 0; i < ROWS; i++)
+    {
+            printf("%s\n", array[i]);
+    }
+}
+
+void count_occs(int *zeroes, int *ones, char array[ROWS][COLS], int col)
+{
+    int zerocount = 0;
+    int onecount = 0;
+    for (int i = 0; i < ROWS; i++)
+    {
+        if ((array[i][col]) == '0')
+        {
+            zerocount++;
+        }
+        else if ((array[i][col]) == '1')
+        {
+            onecount++;
+        }
+    }
+    *zeroes = zerocount;
+    *ones = onecount;
+}
+
+void comp_g_e(char g[COLS], char e[COLS], char array[ROWS][COLS])
+{
+    for (int i = 0; i < COLS - 1; i++) // We use cols - 1 here as the last column consists of null terminators
+    {
+        int zeroes = 0;
+        int ones = 0;
+        count_occs(&zeroes, &ones, array, i);
+        if (zeroes > ones)
+        {
+            g[i] = '0';
+            e[i] = '1';
+        }
+        else
+        {
+            g[i] = '1';
+            e[i] = '0';
+        }
+    }
+    g[COLS-1] = '\0'; // Null terminator
+    e[COLS-1] = '\0'; // Null terminator
 }
 
 int bin2dec(long long nr)
@@ -60,28 +157,4 @@ int power(int num, int pow) // Raises numbers to power. Only nonnegative exponen
         return num;
     }
     return num * power(num, pow - 1);
-}
-
-void read_input_arr(long long arr[])
-{
-    FILE* fptr; // File pointer
-    fptr = fopen("input.txt", "r"); // Open file read only
-    int i = 0; // Line counter
-
-    if (fptr)
-    {
-        while (fscanf(fptr, "%lld", &arr[i]) != EOF) // Read line to array as int 
-        {
-            i++; // Increment i
-        }
-        fclose(fptr);
-    }
-}
-
-void print_arr(long long arr[], int len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        printf("%lld\n", arr[i]);
-    }
 }
