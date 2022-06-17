@@ -10,9 +10,8 @@ void print_array(char *arr, int ydim);
 void count_occs(int *zeroes, int *ones, char *arr, int colnr, int ydim);
 int bin2dec(long long bin);
 int power(int num, int pow);
-char * all_mem_cpy(int rows);
-void copy_data_where(char *main_arr, int ydim, char *copy_arr, int col, char bitval);
-void get_ogr(char *ogr, char *main_arr);
+void swap_rows(char *A, int row1, int row2);
+void get_ogr(char *A);
 
 int main(void)
 {
@@ -30,8 +29,9 @@ int main(void)
     - A function that manages the memory for this copying.
     */
 
-   get_ogr(ogr, A);
-   // print_array(ogr, 490);
+    get_ogr(A);
+    print_array(A, 1);
+
 
    
 
@@ -50,7 +50,8 @@ void read_arr(char *arr)
         {
             fscanf(fptr, "%c", &arr[i * COLS + j]);
         }
-        arr[i * COLS - 1] = '\0'; // Null terminator
+
+        arr[(i+1)*COLS - 1] = '\0'; 
     }
 }
 
@@ -58,7 +59,7 @@ void print_array(char *arr, int ydim)
 {
     for (int i = 0; i < ydim; i++)
     {
-        printf("%3d ", i);
+        printf("%3d:", i);
         for (int j = 0; j < COLS; j++)
         {
             printf("%c", arr[i * COLS + j]);
@@ -69,7 +70,7 @@ void print_array(char *arr, int ydim)
 
 void count_occs(int *zeroes, int *ones, char *arr, int colnr, int ydim)
 {
-    for (int i = 0; i < ROWS; i++)
+    for (int i = 0; i < ydim; i++)
     {
         if (arr[i * COLS + colnr] == '0')
         {
@@ -111,36 +112,50 @@ int power(int num, int pow) // Raises numbers to power. Only nonnegative exponen
     return num * power(num, pow - 1);
 }
 
-char * all_mem_cpy(int rows)
+void swap_rows(char *A, int row1, int row2)
 {
-    char *ptr = malloc( sizeof(char) * rows * COLS);
-    memset(ptr, 0, sizeof(char) * rows * COLS);
-    return ptr;
+    char tmp;
+    for (int j = 0; j < COLS; j++)
+    {
+        tmp = A[COLS * row1 + j];
+        A[COLS * row1 + j] = A[COLS * row2 + j];
+        A[COLS * row2 + j] = tmp;
+    }
 }
 
-void copy_data_where(char *main_arr, int ydim, char *copy_arr, int col, char bitval)
+void get_ogr(char *A)
 {
-    for (int i = 0; i < ydim; i++)
+    int ydim = ROWS;
+    for (int colindex = 0; colindex < COLS - 1; colindex++) // COLS - 1 as the last character is a NULL TERMINATOR character.
     {
-        for (int j = 0; j < COLS; j++)
+        int ones = 0, zeroes = 0;
+        count_occs(&zeroes, &ones, A, colindex, ydim);
+        if (ones >= zeroes)
+        { 
+            int unchecked_row = 0;
+            for (int row = 0; row < ydim; row++)
+            {
+                if (A[row * COLS + colindex] == '1')
+                {
+                    swap_rows(A, unchecked_row, row);
+                    unchecked_row++;
+                }
+            }
+            ydim = ones;
+        }
+        else
         {
-            copy_arr[i * COLS + j] = main_arr[i * COLS + j];
+            int unchecked_row = 0;
+            for (int row = 0; row < ydim; row++)
+            {
+                if (A[row * COLS + colindex] == '0')
+                {
+                    swap_rows(A, unchecked_row, row);
+                    unchecked_row++;
+                }
+            }
+            ydim = zeroes;
         }
     }
 }
 
-void get_ogr(char *ogr, char *main_arr)
-{
-    for (int currcol = 0; currcol < 1; currcol++)
-    {
-        int zeroes = 0, ones = 0;
-        count_occs(&zeroes, &ones, main_arr, currcol, ROWS);
-        printf("Zeroes are %d, ones are %d\n", zeroes, ones);
-        if (zeroes < ones)
-        {
-            char *temparr = all_mem_cpy(zeroes);
-            copy_data_where(main_arr, zeroes, temparr, currcol, '0');
-            print_array(temparr, zeroes);
-        }
-    }
-}
