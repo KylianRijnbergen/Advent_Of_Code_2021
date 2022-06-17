@@ -12,6 +12,8 @@ int bin2dec(long long bin);
 int power(int num, int pow);
 void swap_rows(char *A, int row1, int row2);
 void get_ogr(char *A);
+void copy_row(char *A, char *dest, int row);
+void get_csr(char *A);
 
 int main(void)
 {
@@ -19,6 +21,7 @@ int main(void)
     read_arr(A); // Fill array
     // print_array(A, ROWS); // Print array
 
+    // OGR PART
     char ogr[COLS]; // Oxygen generator rating
     memset(&ogr, 0, sizeof(char) * COLS); // Clear ogr
 
@@ -30,12 +33,30 @@ int main(void)
     */
 
     get_ogr(A);
-    print_array(A, 1);
+
+     // First row contains correct value for ogr
+    copy_row(A, ogr, 0);
+    printf("OGR is: ");
+    print_array(ogr, 1); // Print ogr
+
+    // CSR PART
+    char csr[COLS];
+    memset(&csr, 0, sizeof(char) * COLS);
+    get_csr(A);
+    copy_row(A, csr, 0);
+    printf("CSR is: ");
+    print_array(csr, 1);
 
 
-   
+    // Multiplication part
+    long long ogrbin = atoll(ogr);
+    long long csrbin = atoll(csr);
 
-    
+    long long ogrdec = bin2dec(ogrbin);
+    long long csrdec = bin2dec(csrbin);
+
+    printf("In decimal, ogr is %lld, csr is %lld. product is %lld.\n", ogrdec, csrdec, ogrdec * csrdec);
+
     return 0;
 }
 
@@ -159,3 +180,46 @@ void get_ogr(char *A)
     }
 }
 
+void copy_row(char *A, char *dest, int rownr)
+{
+    for (int i = 0; i < COLS; i++)
+    {
+        dest[i] = A[rownr * COLS + i]; 
+    }
+}
+
+void get_csr(char *A)
+{
+    int ydim = ROWS;
+    for (int colindex = 0; colindex < COLS - 1; colindex++) // COLS - 1 as the last character is a NULL TERMINATOR character.
+    {
+        int ones = 0, zeroes = 0;
+        count_occs(&zeroes, &ones, A, colindex, ydim);
+        if (ones < zeroes)
+        { 
+            int unchecked_row = 0;
+            for (int row = 0; row < ydim; row++)
+            {
+                if (A[row * COLS + colindex] == '1')
+                {
+                    swap_rows(A, unchecked_row, row);
+                    unchecked_row++;
+                }
+            }
+            ydim = ones;
+        }
+        else
+        {
+            int unchecked_row = 0;
+            for (int row = 0; row < ydim; row++)
+            {
+                if (A[row * COLS + colindex] == '0')
+                {
+                    swap_rows(A, unchecked_row, row);
+                    unchecked_row++;
+                }
+            }
+            ydim = zeroes;
+        }
+    }
+}
